@@ -53,7 +53,7 @@ class MagicAnimate():
         inference_config = OmegaConf.load(config.inference_config)
             
         motion_module = config.motion_module
-       
+        
         ### >>> create animation pipeline >>> ###
         tokenizer = CLIPTokenizer.from_pretrained(config.pretrained_model_path, subfolder="tokenizer")
         text_encoder = CLIPTextModel.from_pretrained(config.pretrained_model_path, subfolder="text_encoder")
@@ -187,9 +187,12 @@ class MagicAnimate():
             time_str = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
             savedir = f"demo/outputs"
             animation_path = f"{savedir}/{time_str}.mp4"
+            animation_only_path = f"{savedir}/animation_only_{time_str}.mp4"  # 生成されたアニメーション専用のパス
 
             os.makedirs(savedir, exist_ok=True)
             save_videos_grid(samples_per_video, animation_path)
+            save_videos_grid(sample[:, :, :original_length], animation_only_path)
             
-            return animation_path
+            return animation_path, animation_only_path
+            
             

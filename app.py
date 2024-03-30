@@ -19,14 +19,15 @@ from demo.animate import MagicAnimate
 
 from huggingface_hub import snapshot_download
 
-snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", local_dir="./stable-diffusion-v1-5")
+# snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", local_dir="./stable-diffusion-v1-5")
 snapshot_download(repo_id="stabilityai/sd-vae-ft-mse", local_dir="./sd-vae-ft-mse")
 snapshot_download(repo_id="zcxu-eric/MagicAnimate", local_dir="./MagicAnimate")
 
 animator = MagicAnimate()
 
 def animate(reference_image, motion_sequence_state, seed, steps, guidance_scale):
-    return animator(reference_image, motion_sequence_state, seed, steps, guidance_scale)
+    animation_path, animation_only_path = animator(reference_image, motion_sequence_state, seed, steps, guidance_scale)
+    return animation_path, animation_only_path
 
 with gr.Blocks() as demo:
 
@@ -45,6 +46,8 @@ with gr.Blocks() as demo:
         </div>
         """)
     animation = gr.Video(format="mp4", label="Animation Results", autoplay=True)
+    animation_only = gr.Video(format="mp4", label="Animation Only Results", autoplay=True)
+
     
     with gr.Row():
         reference_image  = gr.Image(label="Reference Image")
@@ -57,7 +60,7 @@ with gr.Blocks() as demo:
             submit              = gr.Button("Animate")
 
     def read_video(video):
-        size = int(size)
+        #size = int(size) (thanks to Van-wise ❤)
         reader = imageio.get_reader(video)
         fps = reader.get_meta_data()['fps']
         assert fps == 25.0, f'Expected video fps: 25, but {fps} fps found'
@@ -81,8 +84,8 @@ with gr.Blocks() as demo:
     # when the `submit` button is clicked
     submit.click(
         animate,
-        [reference_image, motion_sequence, random_seed, sampling_steps, guidance_scale], 
-        animation
+        inputs=[reference_image, motion_sequence, random_seed, sampling_steps, guidance_scale],
+        outputs=[animation, animation_only]
     )
 
     # Examples
